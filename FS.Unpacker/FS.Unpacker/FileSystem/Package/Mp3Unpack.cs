@@ -44,10 +44,9 @@ namespace FS.Unpacker
                 Byte[] lpDstEntryBuffer = new Byte[dwTableSize];
 
                 TFileStream.Seek(dwTableOffset, SeekOrigin.Begin);
-                var lpSrcEntryBuffer = TFileStream.ReadBytes((int)dwTableZSize);
+                var lpSrcEntryBuffer = TFileStream.ReadBytes((Int32)dwTableZSize);
                 LZO1X.iDecompress(lpSrcEntryBuffer, dwTableZSize, lpDstEntryBuffer, ref dwTableSize);
 
-                String m_FileName = null;
                 using (var TMemoryReader = new MemoryStream(lpDstEntryBuffer))
                 {
                     for (Int32 i = 0; i < dwTotalFiles; i++)
@@ -68,31 +67,37 @@ namespace FS.Unpacker
                         }
                         else if (bFileFlag == 1)
                         {
-                            m_FileName = Mp3HashList.iGetNameFromHashList(dwFileNameCRC);
+                            String m_FilePath = null;
+                            String m_FileName = iGetHintFromArchive(TFileStream, dwOffset, dwZSize, 1, wFileNameLength);
+                            String m_FolderName = Mp3HashList.iGetNameFromHashList(dwFolderNameCRC);
 
-                            if (m_FileName.Contains("__Unknown"))
+                            if (m_FolderName.Contains("__Unknown"))
                             {
-                                m_FileName = @"__Unknown\" + dwFolderNameCRC.ToString("X8") + @"\" + iGetHintFromArchive(TFileStream, dwOffset, dwZSize, 1, wFileNameLength);
+                                m_FilePath = @"__Unknown\" + dwFolderNameCRC.ToString("X8") + @"\";
                             }
 
-                            String m_FullPath = m_DstFolder + @"\" + m_FileName.Replace("/", @"\");
-                            Console.WriteLine("[UNPACKING]: {0}", m_FileName);
+                            m_FilePath = m_FolderName.Replace("/", @"\") + @"\" + m_FileName;
+                            String m_FullPath = m_DstFolder + m_FilePath;
+                            Console.WriteLine("[UNPACKING]: {0}", m_FilePath);
 
                             Utils.iCreateDirectory(m_FullPath);
 
-                            TFileStream.Seek(dwOffset, SeekOrigin.Begin);
-                            var lpSrcBuffer = TFileStream.ReadBytes((int)dwZSize);
-
-                            if (bCompressionFlag == 1)
+                            if (!File.Exists(m_FullPath))
                             {
-                                File.WriteAllBytes(m_FullPath, lpSrcBuffer);
-                            }
-                            else if (bCompressionFlag == 3)
-                            {
-                                Byte[] lpDstBuffer = new Byte[dwSize];
-                                LZO1X.iDecompress(lpSrcBuffer, dwZSize, lpDstBuffer, ref dwSize);
+                                TFileStream.Seek(dwOffset, SeekOrigin.Begin);
+                                var lpSrcBuffer = TFileStream.ReadBytes((Int32)dwZSize);
 
-                                File.WriteAllBytes(m_FullPath, lpDstBuffer);
+                                if (bCompressionFlag == 1)
+                                {
+                                    File.WriteAllBytes(m_FullPath, lpSrcBuffer);
+                                }
+                                else if (bCompressionFlag == 3)
+                                {
+                                    Byte[] lpDstBuffer = new Byte[dwSize];
+                                    LZO1X.iDecompress(lpSrcBuffer, dwZSize, lpDstBuffer, ref dwSize);
+
+                                    File.WriteAllBytes(m_FullPath, lpDstBuffer);
+                                }
                             }
                         }
                     }

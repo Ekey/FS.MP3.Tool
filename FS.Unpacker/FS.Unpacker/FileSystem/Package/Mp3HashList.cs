@@ -8,7 +8,7 @@ namespace FS.Unpacker
     class Mp3HashList
     {
         static String m_Path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        static String m_ProjectFile = @"\Projects\FileNames.list";
+        static String m_ProjectFile = @"\Projects\FolderNames.list";
         static String m_ProjectFilePath = m_Path + m_ProjectFile;
 
         public static Dictionary<String, String> m_HashList = new Dictionary<String, String>();
