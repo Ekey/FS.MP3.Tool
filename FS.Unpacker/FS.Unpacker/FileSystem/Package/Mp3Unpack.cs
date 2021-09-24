@@ -6,22 +6,6 @@ namespace FS.Unpacker
 {
     class Mp3Unpack
     {
-        static String iGetHintFromArchive(FileStream TFileStream, UInt32 dwOffset, UInt32 dwZSize, Int32 bFlag, Int16 wStringLength)
-        {
-            if (bFlag == 3)
-            {
-                TFileStream.Seek(dwOffset, SeekOrigin.Begin);
-            }
-            else if (bFlag == 1)
-            {
-                TFileStream.Seek(dwOffset + dwZSize, SeekOrigin.Begin);
-            }
-
-            var lpHitString = TFileStream.ReadBytes(wStringLength - 1);
-            String m_HitString = Encoding.ASCII.GetString(lpHitString);
-            return m_HitString;
-        }
-
         public static void iDoIt(String m_Archive, String m_DstFolder)
         {
             Mp3HashList.iLoadProject();
@@ -68,7 +52,7 @@ namespace FS.Unpacker
                         else if (bFileFlag == 1)
                         {
                             String m_FilePath = null;
-                            String m_FileName = iGetHintFromArchive(TFileStream, dwOffset, dwZSize, 1, wFileNameLength);
+                            String m_FileName = Mp3HashList.iGetNameFromArchive(TFileStream, dwOffset, dwZSize, bFileFlag, wFileNameLength);
                             String m_FolderName = Mp3HashList.iGetNameFromHashList(dwFolderNameCRC);
 
                             if (m_FolderName.Contains("__Unknown"))

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using System.Reflection;
 using System.Collections.Generic;
 
@@ -64,6 +65,22 @@ namespace FS.Unpacker
             }
 
             return m_FileName;
+        }
+
+        public static String iGetNameFromArchive(FileStream TFileStream, UInt32 dwOffset, UInt32 dwZSize, Int32 bFlag, Int16 wStringLength)
+        {
+            if (bFlag == 3)
+            {
+                TFileStream.Seek(dwOffset, SeekOrigin.Begin);
+            }
+            else if (bFlag == 1)
+            {
+                TFileStream.Seek(dwOffset + dwZSize, SeekOrigin.Begin);
+            }
+
+            var lpHintData = TFileStream.ReadBytes(wStringLength - 1);
+            String lpHintName = Encoding.ASCII.GetString(lpHintData);
+            return lpHintName;
         }
     }
 }
